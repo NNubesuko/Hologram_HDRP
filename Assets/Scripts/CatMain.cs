@@ -10,15 +10,21 @@ using KataokaLib.System;
 public class CatMain : MonoBehaviour {
 
     [SerializeField] private GameAdmin gameAdmin;
-    [SerializeField] private float rotateMagnification;
+    [SerializeField] private Renderer catRenderer;
+    [SerializeField] private Transform initPoint;       // 初期位置
+    [SerializeField] private Transform teleportPoint;   // テクスチャ設定後の転送先
+    [SerializeField] private Transform movePoint;       // 移動先
+    [SerializeField] private float moveSpeed;
 
     private Material material;
-    private bool oneTime = true;
+    private bool oneTime = false;
+    private bool attachedTexture = false;
+    private bool teleported = false;
 
-    private float rotateY = 0f;
+    private Vector3 lastPosition;
 
     private void Awake() {
-        material = GetComponent<Renderer>().material;
+        material = catRenderer.material;
     }
 
     private void Update() {
@@ -31,8 +37,32 @@ public class CatMain : MonoBehaviour {
             Attach();
         }
 
-        transform.rotation = Quaternion.Euler(0f, rotateY, 0f);
-        rotateY += rotateMagnification * Time.deltaTime;
+        if (attachedTexture) {
+            attachedTexture = false;
+            Invoke("ForwardToDestination", 3f);
+        }
+
+        if (teleported) {
+            Vector3 currentPosition = lastPosition = transform.position;
+
+            currentPosition = Vector3.MoveTowards(
+                currentPosition,
+                movePoint.position,
+                moveSpeed * Time.deltaTime
+            );
+
+            Vector3 diff = currentPosition - lastPosition;
+            if (diff != Vector3.zero) {
+                transform.rotation = Quaternion.LookRotation(diff, Vector3.up);
+            }
+
+            transform.position = currentPosition;
+        }
+
+        if (transform.position == movePoint.position) {
+            teleported = false;
+            transform.position = initPoint.position;
+        }
     }
 
     /*
@@ -42,7 +72,8 @@ public class CatMain : MonoBehaviour {
         Texture2D attachTexture = CreateTexture.Create(
             gameAdmin.textureSize,
             gameAdmin.textureSize,
-            Brushes.Transparent,
+            // Brushes.Transparent,
+            Brushes.Black,
             gameAdmin.fontSize,
             new FontFamily("游明朝"),
             Brushes.White,
@@ -52,7 +83,8 @@ public class CatMain : MonoBehaviour {
         attachTexture.filterMode = FilterMode.Point;
         attachTexture.Apply();
 
-        material.SetTexture("_BaseMap", attachTexture);
+        material.SetTexture("_BaseColorMap", attachTexture);
+        attachedTexture = true;
     }
 
     /*
@@ -66,6 +98,11 @@ public class CatMain : MonoBehaviour {
         }
 
         return sb.ToString();
+    }
+
+    private void ForwardToDestination() {
+        transform.position = teleportPoint.position;
+        teleported = true;
     }
 
 }
