@@ -10,7 +10,7 @@ using KataokaLib.System;
 public class CatMain : MonoBehaviour {
 
     [SerializeField] private GameAdmin gameAdmin;
-    [SerializeField] private Renderer catRenderer;
+    [SerializeField] private Renderer catRenderer;      // 猫のRenderer
     [SerializeField] private Transform initPoint;       // 初期位置
     [SerializeField] private Transform teleportPoint;   // テクスチャ設定後の転送先
     [SerializeField] private Transform movePoint;       // 移動先
