@@ -20,7 +20,7 @@ public class GameAdmin : MonoBehaviour {
 
     private bool isInput = false;
 
-    private string sentiment = "";
+    private string sentiment = string.Empty;
 
     // 削除予定
     private void InitField() {
@@ -50,15 +50,22 @@ public class GameAdmin : MonoBehaviour {
         ResponceEmotionalAnalysis responceEmotionalAnalysis =
             cotohaEmotionalAnalysis.responceEmotionalAnalysis;
         if (responceEmotionalAnalysis != null) {
+            // WebAPIのレスポンスから感情のリストを取得
             EmotionalAnalysisResult emotionalAnalysisResult = responceEmotionalAnalysis.result;
-            sentiment = emotionalAnalysisResult.sentiment;
+            List<EmotionalAnalysisPhrase> emotionalList = emotionalAnalysisResult.emotional_phrase;
+
+            // 初期値をNeutralの0に設定
+            int sentimentCount = 0;
+            // 各フレーズごとに感情を分ける
+            for (int i = 0; i < emotionalList.Count; i++) {
+                sentimentCount += GetEmotionalNumber(emotionalList[i].emotion);
+            }
+            // 感情値から感情を取得
+            sentiment = GetEmotional(sentimentCount);
         }
 
+        // 感情により行動を分岐させる
         SelectSentiment(sentiment);
-
-        if (Input.GetKeyDown(KeyCode.Escape)) {
-            GameAdministrator.QuitGame();
-        }
     }
 
     // WebAPIの処理はFixedUpdateで行う
@@ -90,8 +97,54 @@ public class GameAdmin : MonoBehaviour {
                 Debug.Log("中立な処理");
                 break;
             default:
-                Debug.Log("何もしない");
                 break;
+        }
+    }
+
+    private int GetEmotionalNumber(string emotional) {
+        switch (emotional) {
+            case "喜ぶ":
+                return 1;
+            case "怒る":
+                return -1;
+            case "悲しい":
+                return -1;
+            case "不安":
+                return -1;
+            case "恥ずかしい":
+                return -1;
+            case "好ましい":
+                return 1;
+            case "嫌":
+                return -1;
+            case "興奮":
+                return 1;
+            case "安心":
+                return 1;
+            case "驚く":
+                return 0;
+            case "切ない":
+                return -1;
+            case "願望":
+                return 0;
+            case "P":
+                return 1;
+            case "N":
+                return -1;
+            case "PN":
+                return 0;
+            default:
+                return 0;
+        }
+    }
+
+    private string GetEmotional(int value) {
+        if (value >= 1) {
+            return Sentiment.Positive;
+        } else if (value <= -1) {
+            return Sentiment.Negative;
+        } else {
+            return Sentiment.Neutral;
         }
     }
 

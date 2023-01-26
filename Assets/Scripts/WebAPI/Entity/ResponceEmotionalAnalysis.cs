@@ -26,4 +26,8 @@ public class EmotionalAnalysisPhrase {
     public string form;
     public string emotion;
 
+    public override string ToString() {
+        return $"{form}: {emotion}";
+    }
+
 }

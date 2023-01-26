@@ -54,13 +54,6 @@ public class CotohaEmotionalAnalysis : MonoBehaviour {
             JsonUtility.FromJson<ResponceEmotionalAnalysis>(request.downloadHandler.text);
 
         EmotionalAnalysisResult emotionalAnalysisResult = responceEmotionalAnalysis.result;
-        // Debug.Log(emotionalAnalysisResult.sentiment);
-        // Debug.Log(emotionalAnalysisResult.score);
-
-        // foreach (EmotionalAnalysisPhrase item in emotionalAnalysisResult.emotional_phrase) {
-        //     Debug.Log(item.form);
-        //     Debug.Log(item.emotion);
-        // }
     }
 
 }

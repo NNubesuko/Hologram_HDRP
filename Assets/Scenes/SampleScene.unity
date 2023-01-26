@@ -5189,7 +5189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a22668e488cb10f44b6a8b2573bc48fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  input: Hello
+  input: "\u30CF\u30F3\u30D0\u30FC\u30AC\u30FC\u304C\u98DF\u3079\u305F\u3044"
   length: 3000
   size: 2048
   font: 60
@@ -7300,22 +7300,6 @@ MonoBehaviour:
   catRenderer: {fileID: 1604065565}
   initPoint: {fileID: 1842576223}
   teleportPoint: {fileID: 1926791726}
-  movePoint: {fileID: 31695787}
-  moveSpeed: 0.5
---- !u!114 &1189338029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189338025}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41fd67a101a6d92419546ff49e1a7460, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  loops: 10
-  movingTime: 10
   movePoint: {fileID: 31695787}
 --- !u!1001 &1225079265
 PrefabInstance:
