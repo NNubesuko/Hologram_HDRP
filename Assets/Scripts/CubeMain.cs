@@ -10,6 +10,14 @@ using DG.Tweening;
 public class CubeMain : MonoBehaviour {
 
     private void Start() {
+        // Sequence sequence = DOTween.Sequence();
+        // sequence.Append(
+        //     transform.DOMove(new Vector3(1f, 0f, 0f), 1f)
+        //         .SetRelative(true)
+        // );
+
+        // sequence.Play();
+
         // transform.DOLocalMove(new Vector3(34f, 3f, 3f), 3f)
         //     .SetLoops(-1, LoopType.Yoyo)
         //     .SetEase(Ease.InOutQuart);
@@ -19,8 +27,8 @@ public class CubeMain : MonoBehaviour {
         // transform.DOScale(new Vector3(2f, 2f, 2f), 3f)
         //     .SetLoops(-1, LoopType.Yoyo)
         //     .SetEase(Ease.InOutQuart);
-        transform.DOMove(new Vector3(29f, 1f, 3f), 1f)
-            .SetLoops(3, LoopType.Incremental);
+        // transform.DOMove(new Vector3(29f, 1f, 3f), 1f)
+        //     .SetLoops(3, LoopType.Incremental);
     }
 
     private void Update() {

@@ -4,8 +4,7 @@ using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using KataokaLib.System;
+using DG.Tweening;
 
 public class CatMain : MonoBehaviour {
 
@@ -14,12 +13,12 @@ public class CatMain : MonoBehaviour {
     [SerializeField] private Transform initPoint;       // 初期位置
     [SerializeField] private Transform teleportPoint;   // テクスチャ設定後の転送先
     [SerializeField] private Transform movePoint;       // 移動先
-    [SerializeField] private float moveSpeed;
 
     private Material material;
-    private bool oneTime = false;
+    private bool inputed = false;
     private bool attachedTexture = false;
     private bool teleported = false;
+    private bool startAnimation = false;
 
     private Vector3 lastPosition;
 
@@ -29,40 +28,58 @@ public class CatMain : MonoBehaviour {
 
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Return)) {
-            oneTime = true;
+            inputed = true;
         }
 
-        if (oneTime) {
-            oneTime = false;
+        if (inputed) {
+            inputed = false;
             Attach();
         }
 
         if (attachedTexture) {
             attachedTexture = false;
-            Invoke("ForwardToDestination", 3f);
+            Invoke("ForwardToDestination", 5f);
         }
 
         if (teleported) {
-            Vector3 currentPosition = lastPosition = transform.position;
 
-            currentPosition = Vector3.MoveTowards(
-                currentPosition,
-                movePoint.position,
-                moveSpeed * Time.deltaTime
-            );
+            if (startAnimation) {
+                startAnimation = false;
 
-            Vector3 diff = currentPosition - lastPosition;
-            if (diff != Vector3.zero) {
-                transform.rotation = Quaternion.LookRotation(diff, Vector3.up);
+                Sequence sequence = DOTween.Sequence();
+                sequence.Append(
+                    material.DOFade(0f, 0.8f).SetDelay(0.2f)
+                ).SetLoops(10, LoopType.Yoyo);
+                sequence.Play();
+
+                StartCoroutine(Move());
             }
 
-            transform.position = currentPosition;
+        } else {
+            transform.position = Vector3.zero;
         }
 
-        if (transform.position == movePoint.position) {
-            teleported = false;
-            transform.position = initPoint.position;
-        }
+        // if (teleported) {
+        //     Vector3 currentPosition = lastPosition = transform.position;
+
+        //     currentPosition = Vector3.MoveTowards(
+        //         currentPosition,
+        //         movePoint.position,
+        //         moveSpeed * Time.deltaTime
+        //     );
+
+        //     Vector3 diff = currentPosition - lastPosition;
+        //     if (diff != Vector3.zero) {
+        //         transform.rotation = Quaternion.LookRotation(diff, Vector3.up);
+        //     }
+
+        //     transform.position = currentPosition;
+        // }
+
+        // if (transform.position.x <= movePoint.position) {
+        //     teleported = false;
+        //     transform.position = initPoint.position;
+        // }
     }
 
     /*
@@ -72,18 +89,20 @@ public class CatMain : MonoBehaviour {
         Texture2D attachTexture = CreateTexture.Create(
             gameAdmin.textureSize,
             gameAdmin.textureSize,
-            // Brushes.Transparent,
             Brushes.Black,
             gameAdmin.fontSize,
             new FontFamily("游明朝"),
-            Brushes.White,
+            new SolidBrush(System.Drawing.Color.White),
             FormatText(gameAdmin.inputText, gameAdmin.textLength)
         );
 
         attachTexture.filterMode = FilterMode.Point;
         attachTexture.Apply();
 
+        // 白い状態から出ないと文字色を変更できないため、白で塗りつぶす
+        material.color = UnityEngine.Color.white;
         material.SetTexture("_BaseColorMap", attachTexture);
+        
         attachedTexture = true;
     }
 
@@ -103,6 +122,31 @@ public class CatMain : MonoBehaviour {
     private void ForwardToDestination() {
         transform.position = teleportPoint.position;
         teleported = true;
+        startAnimation = true;
+    }
+
+    private IEnumerator Move() {
+        while (transform.position.x <= movePoint.position.x) {
+            transform.DOMove(new Vector3(4f, 0f, 0f), 2f).SetEase(Ease.Linear).SetRelative(true);
+            yield return new WaitForSeconds(1f);
+            
+            transform.DOPause();
+            yield return new WaitForSeconds(1f);
+            
+            transform.DOPlay();
+
+            yield return null;
+        }
+
+        InitParams();
+        yield return null;
+    }
+
+    private void InitParams() {
+        inputed = false;
+        attachedTexture = false;
+        teleported = false;
+        material.color = UnityEngine.Color.black;
     }
 
 }
