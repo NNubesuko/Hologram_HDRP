@@ -58,28 +58,6 @@ public class CatMain : MonoBehaviour {
         } else {
             transform.position = Vector3.zero;
         }
-
-        // if (teleported) {
-        //     Vector3 currentPosition = lastPosition = transform.position;
-
-        //     currentPosition = Vector3.MoveTowards(
-        //         currentPosition,
-        //         movePoint.position,
-        //         moveSpeed * Time.deltaTime
-        //     );
-
-        //     Vector3 diff = currentPosition - lastPosition;
-        //     if (diff != Vector3.zero) {
-        //         transform.rotation = Quaternion.LookRotation(diff, Vector3.up);
-        //     }
-
-        //     transform.position = currentPosition;
-        // }
-
-        // if (transform.position.x <= movePoint.position) {
-        //     teleported = false;
-        //     transform.position = initPoint.position;
-        // }
     }
 
     /*
