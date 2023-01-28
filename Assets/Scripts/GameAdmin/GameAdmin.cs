@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using KataokaLib.System;
+using UnityEngine.VFX;
+using DG.Tweening;
 
 public class GameAdmin : MonoBehaviour {
 
@@ -10,19 +11,40 @@ public class GameAdmin : MonoBehaviour {
     [SerializeField] private int size;
     [SerializeField] private int font;
 
+    [SerializeField] private GameObject catObject;
+
+    [Header("アニメーション位置")]
+    [SerializeField] private Transform teleportPoint;
+    [SerializeField] private Transform movePoint;
+
+    [Header("ポジティブの場合")]
+    [SerializeField] private GameObject butterfliesObject;
+    private VisualEffect butterfliesVFX;
+
     public string inputText { get; private set; }
     public int textLength { get; private set; }
     public int textureSize { get; private set; }
     public int fontSize { get; private set; }
 
+    // 入力されたか
+    public bool isInput { get; set; }
+    // テクスチャを適応することが出来たか
+    public bool attachedTexture { get; private set; }
+    // 絵画の場所に移動したか
+    public bool teleported { get; private set; }
+    // アニメーションが始まったか
+    public bool startAnimation { get; private set; }
+
     private CotohaAccessToken cotohaAccessToken;
     private CotohaEmotionalAnalysis cotohaEmotionalAnalysis;
+    private CatMain catMain;
 
-    private bool isInput = false;
+    private string sentiment = SentimentType.None;
+    private bool positiveInProcess = true;
+    private bool negativeInProcess = true;
+    private bool neutralInProcess = true;
 
-    private string sentiment = string.Empty;
-
-    // 削除予定
+    // * 削除予定
     private void InitField() {
         inputText = input;
         textLength = length;
@@ -33,6 +55,11 @@ public class GameAdmin : MonoBehaviour {
     private void Awake() {
         cotohaAccessToken = GetComponent<CotohaAccessToken>();
         cotohaEmotionalAnalysis = GetComponent<CotohaEmotionalAnalysis>();
+        catMain = catObject.GetComponent<CatMain>();
+
+        butterfliesVFX = butterfliesObject.GetComponent<VisualEffect>();
+
+        isInput = false;
 
         InitField();
     }
@@ -49,6 +76,7 @@ public class GameAdmin : MonoBehaviour {
         // 感情分析結果を格納するクラスから、感情を取得
         ResponceEmotionalAnalysis responceEmotionalAnalysis =
             cotohaEmotionalAnalysis.responceEmotionalAnalysis;
+
         if (responceEmotionalAnalysis != null) {
             // WebAPIのレスポンスから感情のリストを取得
             EmotionalAnalysisResult emotionalAnalysisResult = responceEmotionalAnalysis.result;
@@ -62,10 +90,11 @@ public class GameAdmin : MonoBehaviour {
             }
             // 感情値から感情を取得
             sentiment = GetEmotional(sentimentCount);
+            cotohaEmotionalAnalysis.InitResponceEmotionalAnalysis();
         }
 
         // 感情により行動を分岐させる
-        SelectSentiment(sentiment);
+        SelectSentimentType(sentiment);
     }
 
     // WebAPIの処理はFixedUpdateで行う
@@ -85,22 +114,52 @@ public class GameAdmin : MonoBehaviour {
         }
     }
 
-    private void SelectSentiment(string sentiment) {
+    /// <summary>
+    /// 感情により行動を分岐するメソッド
+    /// </summary>
+    /// <param name="sentiment"></param>
+    private void SelectSentimentType(string sentiment) {
+        if (!catMain.teleported) return;
+
         switch (sentiment) {
-            case Sentiment.Positive:
-                Debug.Log("ポジティブな処理");
+            case SentimentType.Positive:
+                if (positiveInProcess) {
+                    positiveInProcess = false;
+                    StartCoroutine(PositiveInProcess(butterfliesObject.transform, 3));
+                }
                 break;
-            case Sentiment.Negative:
-                Debug.Log("ネガティブな処理");
+            case SentimentType.Negative:
+                if (negativeInProcess) {
+                    negativeInProcess = false;
+                    // コルーチン
+                }
                 break;
-            case Sentiment.Neutral:
-                Debug.Log("中立な処理");
+            case SentimentType.Neutral:
+                if (neutralInProcess) {
+                    neutralInProcess = false;
+                    // コルーチン
+                }
                 break;
             default:
+                Debug.Log("入力受付中");
                 break;
         }
     }
 
+    private IEnumerator PositiveInProcess(Transform vfx, int repeatCount) {
+        vfx.DOMove(new Vector3(10f, 0f, 0f), 24f).SetEase(Ease.Linear).SetRelative(true);
+        vfx.GetComponent<VisualEffect>().enabled = true;
+        for (int i = 0; i < repeatCount; i++) {
+            vfx.GetComponent<VisualEffect>().Play();
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// 渡されたフレーズが、ポジティブなら1、ネガティブなら-1、中立なら0を返却するメソッド
+    /// </summary>
+    /// <param name="emotional"></param>
+    /// <returns></returns>
     private int GetEmotionalNumber(string emotional) {
         switch (emotional) {
             case "喜ぶ":
@@ -138,20 +197,36 @@ public class GameAdmin : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// どの感情に相当するか判定するメソッド
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
     private string GetEmotional(int value) {
         if (value >= 1) {
-            return Sentiment.Positive;
+            return SentimentType.Positive;
         } else if (value <= -1) {
-            return Sentiment.Negative;
+            return SentimentType.Negative;
         } else {
-            return Sentiment.Neutral;
+            return SentimentType.Neutral;
         }
+    }
+
+    /// <summary>
+    /// パラメータを初期化するメソッド
+    /// </summary>
+    public void InitSentiment() {
+        sentiment = SentimentType.None;
+        positiveInProcess = true;
+        negativeInProcess = true;
+        neutralInProcess = true;
     }
 
 }
 
-public class Sentiment {
+public class SentimentType {
 
+    public const string None = "None";
     public const string Positive = "Positive";
     public const string Negative = "Negative";
     public const string Neutral = "Neutral";

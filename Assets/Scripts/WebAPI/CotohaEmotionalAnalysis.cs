@@ -9,9 +9,13 @@ using System.Threading.Tasks;
 
 public class CotohaEmotionalAnalysis : MonoBehaviour {
 
-    public ResponceEmotionalAnalysis responceEmotionalAnalysis { get; private set; } = null;
+    public ResponceEmotionalAnalysis responceEmotionalAnalysis { get; private set; }
 
     private const string url = "https://api.ce-cotoha.com/api/dev/nlp/v1/sentiment";
+
+    private void Awake() {
+        responceEmotionalAnalysis = null;
+    }
 
     /*
      * 文章の感情分析結果をWebAPIに要求するメソッド
@@ -52,8 +56,10 @@ public class CotohaEmotionalAnalysis : MonoBehaviour {
     private void ResponceEmotionalAnalysis(UnityWebRequest request) {
         responceEmotionalAnalysis =
             JsonUtility.FromJson<ResponceEmotionalAnalysis>(request.downloadHandler.text);
+    }
 
-        EmotionalAnalysisResult emotionalAnalysisResult = responceEmotionalAnalysis.result;
+    public void InitResponceEmotionalAnalysis() {
+        responceEmotionalAnalysis = null;
     }
 
 }
