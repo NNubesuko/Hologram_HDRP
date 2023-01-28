@@ -34,12 +34,12 @@ public class CatMain : MonoBehaviour {
     }
 
     private void Update() {
-        // if (Input.GetKeyDown(KeyCode.Return)) {
-        //     inputed = true;
-        // }
+        if (Input.GetKeyDown(KeyCode.Return)) {
+            inputed = true;
+        }
 
-        if (gameAdmin.isInput) {
-            gameAdmin.isInput = false;
+        if (inputed) {
+            inputed = false;
             Attach();
         }
 
@@ -59,6 +59,7 @@ public class CatMain : MonoBehaviour {
 
         if (!(teleported | startAnimation)) {
             transform.position = initPoint.position;
+            gameAdmin.ResetButterflies();
         }
     }
 
@@ -142,7 +143,7 @@ public class CatMain : MonoBehaviour {
     /// イベント処理で使用するパラメータの初期化
     /// </summary>
     private void InitParams() {
-        gameAdmin.isInput = false;
+        inputed = false;
         attachedTexture = false;
         teleported = false;
         material.color = UnityEngine.Color.black;

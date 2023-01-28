@@ -27,7 +27,7 @@ public class GameAdmin : MonoBehaviour {
     public int fontSize { get; private set; }
 
     // 入力されたか
-    public bool isInput { get; set; }
+    public bool isInput { get; private set; }
     // テクスチャを適応することが出来たか
     public bool attachedTexture { get; private set; }
     // 絵画の場所に移動したか
@@ -105,7 +105,6 @@ public class GameAdmin : MonoBehaviour {
         // WebAPIに短時間で複数回要求してしまうと、無効なやり取りになってしまうため、一度だけ実行させる
         if (cotohaAccessToken.validAccessToken && isInput) {
             isInput = false;
-
             // 渡された文章の感情分析
             cotohaEmotionalAnalysis.RequestEmotionalAnalysis(
                 cotohaAccessToken,
@@ -147,7 +146,7 @@ public class GameAdmin : MonoBehaviour {
     }
 
     private IEnumerator PositiveInProcess(Transform vfx, int repeatCount) {
-        vfx.DOMove(new Vector3(10f, 0f, 0f), 24f).SetEase(Ease.Linear).SetRelative(true);
+        vfx.DOMove(new Vector3(10f, 0f, 0f), 25f).SetEase(Ease.Linear).SetRelative(true);
         vfx.GetComponent<VisualEffect>().enabled = true;
         for (int i = 0; i < repeatCount; i++) {
             vfx.GetComponent<VisualEffect>().Play();
@@ -220,6 +219,17 @@ public class GameAdmin : MonoBehaviour {
         positiveInProcess = true;
         negativeInProcess = true;
         neutralInProcess = true;
+    }
+
+    /// <summary>
+    /// 蝶のパラメータを初期化するメソッド
+    /// </summary>
+    public void ResetButterflies() {
+        Vector3 butterfliesPosition = butterfliesObject.transform.position;
+        butterfliesPosition.x = teleportPoint.position.x;
+        butterfliesObject.transform.position = butterfliesPosition;
+
+        butterfliesVFX.enabled = false;
     }
 
 }
