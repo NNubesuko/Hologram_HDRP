@@ -21,19 +21,17 @@ public class GameAdmin : MonoBehaviour {
     [SerializeField] private GameObject butterfliesObject;
     private VisualEffect butterfliesVFX;
 
+    public PhotoAdmin photoAdmin;
+
     public string inputText { get; private set; }
+
     public int textLength { get; private set; }
     public int textureSize { get; private set; }
     public int fontSize { get; private set; }
 
     // 入力されたか
     public bool isInput { get; private set; }
-    // テクスチャを適応することが出来たか
-    public bool attachedTexture { get; private set; }
-    // 絵画の場所に移動したか
-    public bool teleported { get; private set; }
-    // アニメーションが始まったか
-    public bool startAnimation { get; private set; }
+    private bool isAccessWebapi;
 
     private CotohaAccessToken cotohaAccessToken;
     private CotohaEmotionalAnalysis cotohaEmotionalAnalysis;
@@ -53,6 +51,8 @@ public class GameAdmin : MonoBehaviour {
     }
 
     private void Awake() {
+        photoAdmin = GetComponent<PhotoAdmin>();
+
         cotohaAccessToken = GetComponent<CotohaAccessToken>();
         cotohaEmotionalAnalysis = GetComponent<CotohaEmotionalAnalysis>();
         catMain = catObject.GetComponent<CatMain>();
@@ -60,6 +60,7 @@ public class GameAdmin : MonoBehaviour {
         butterfliesVFX = butterfliesObject.GetComponent<VisualEffect>();
 
         isInput = false;
+        isAccessWebapi = false;
 
         InitField();
     }
@@ -69,6 +70,9 @@ public class GameAdmin : MonoBehaviour {
         // todo: マイク入力完了に変更
         if (Input.GetKeyDown(KeyCode.Return)) {
             isInput = true;
+            isAccessWebapi = true;
+
+            photoAdmin.DisableShouldSwitchPicture();
 
             InitField();
         }
@@ -103,8 +107,8 @@ public class GameAdmin : MonoBehaviour {
         cotohaAccessToken.RequestAccessToken();
 
         // WebAPIに短時間で複数回要求してしまうと、無効なやり取りになってしまうため、一度だけ実行させる
-        if (cotohaAccessToken.validAccessToken && isInput) {
-            isInput = false;
+        if (cotohaAccessToken.validAccessToken && isAccessWebapi) {
+            isAccessWebapi = false;
             // 渡された文章の感情分析
             cotohaEmotionalAnalysis.RequestEmotionalAnalysis(
                 cotohaAccessToken,
@@ -209,6 +213,10 @@ public class GameAdmin : MonoBehaviour {
         } else {
             return SentimentType.Neutral;
         }
+    }
+
+    public void DisableIsInput() {
+        isInput = false;
     }
 
     /// <summary>

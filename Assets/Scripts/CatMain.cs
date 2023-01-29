@@ -34,12 +34,12 @@ public class CatMain : MonoBehaviour {
     }
 
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Return)) {
-            inputed = true;
-        }
+        // if (Input.GetKeyDown(KeyCode.Return)) {
+        //     inputed = true;
+        // }
 
-        if (inputed) {
-            inputed = false;
+        if (gameAdmin.isInput) {
+            gameAdmin.DisableIsInput();
             Attach();
         }
 
@@ -149,6 +149,7 @@ public class CatMain : MonoBehaviour {
         material.color = UnityEngine.Color.black;
         // 感情を初期化
         gameAdmin.InitSentiment();
+        gameAdmin.photoAdmin.EnableShouldSwitchPicture();
     }
 
 }
