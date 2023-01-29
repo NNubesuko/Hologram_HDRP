@@ -18,7 +18,7 @@ public class CotohaAccessToken : MonoBehaviour {
     /*
      * アクセストークンをWebAPIに要求するメソッド
      */
-    public void RequestAccessToken() {
+    public async void RequestAccessToken() {
         TimeSpan now = DateTime.Now.TimeOfDay;
         // 現在時刻が有効期限日に達していなければ、メソッドの処理を終了する
         if (now < effectiveDate) return;
@@ -28,14 +28,12 @@ public class CotohaAccessToken : MonoBehaviour {
 
         string sendJsonData = CreateRequestAccessTokenJson(grantType, clientId, clientSecret);
 
-        StartCoroutine(
-            WebAPIHandler.WebRequest(
-                accessTokenURL,
-                UnityWebRequest.kHttpVerbPOST,
-                sendJsonData,
-                ResponceAccessToken,
-                new RequestHeader("Content-Type", "application/json")
-            )
+        await WebRequest.UniTaskRequest(
+            accessTokenURL,
+            WebRequestMethod.POST,
+            sendJsonData,
+            ResponceAccessToken,
+            new RequestHeader("Content-Type", "application/json")
         );
     }
 

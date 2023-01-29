@@ -2,10 +2,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Networking;
-
-using System.Threading.Tasks;
 
 public class CotohaEmotionalAnalysis : MonoBehaviour {
 
@@ -20,7 +17,7 @@ public class CotohaEmotionalAnalysis : MonoBehaviour {
     /*
      * 文章の感情分析結果をWebAPIに要求するメソッド
      */
-    public void RequestEmotionalAnalysis(
+    public async void RequestEmotionalAnalysis(
         CotohaAccessToken cotohaAccessToken,
         string textToAnalyze
     ) {
@@ -28,15 +25,13 @@ public class CotohaEmotionalAnalysis : MonoBehaviour {
         string sendJsonData = CreateRequestEmotionalAnalysisJson(textToAnalyze);
         string accessToken = cotohaAccessToken.responceAccessToken.access_token;
 
-        StartCoroutine(
-            WebAPIHandler.WebRequest(
-                url,
-                UnityWebRequest.kHttpVerbPOST,
-                sendJsonData,
-                ResponceEmotionalAnalysis,
-                new RequestHeader("Content-Type", "application/json;charset=UTF-8"),
-                new RequestHeader("Authorization", "Bearer " + accessToken)
-            )
+        await WebRequest.UniTaskRequest(
+            url,
+            WebRequestMethod.POST,
+            sendJsonData,
+            ResponceEmotionalAnalysis,
+            new RequestHeader("Content-Type", "application/json;charset=UTF-8"),
+            new RequestHeader("Authorization", "Bearer " + accessToken)
         );
 
     }
