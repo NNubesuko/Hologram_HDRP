@@ -6336,6 +6336,7 @@ GameObject:
   - component: {fileID: 845824828}
   - component: {fileID: 845824827}
   - component: {fileID: 845824829}
+  - component: {fileID: 845824830}
   m_Layer: 0
   m_Name: GameAdmin
   m_TagString: Untagged
@@ -6445,6 +6446,18 @@ MonoBehaviour:
   - {fileID: 1205933037}
   - {fileID: 910230478}
   photoChangeTime: 5
+--- !u!114 &845824830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845824824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ecda0f3fa043614885e0c16afd6aeb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &873680945 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3440968200672152747, guid: 5b0c724d78fc76443aecf7b13c0c78cb, type: 3}

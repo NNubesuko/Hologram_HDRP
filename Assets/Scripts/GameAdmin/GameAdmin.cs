@@ -6,7 +6,6 @@ using DG.Tweening;
 
 public class GameAdmin : MonoBehaviour {
 
-    // [SerializeField] private string input = "";
     [SerializeField] private int length;
     [SerializeField] private int size;
     [SerializeField] private int font;
