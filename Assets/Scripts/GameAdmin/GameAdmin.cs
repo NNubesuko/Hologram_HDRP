@@ -79,13 +79,15 @@ public class GameAdmin : MonoBehaviour {
             if (canInput) {
                 canInput = false;
                 InitField(text);
+                dictationRecognizer.Stop();
             }
         };
 
         dictationRecognizer.DictationComplete += (completeCause) => {
             // 要因がタイムアウトなら再び起動
-            if (completeCause == DictationCompletionCause.TimeoutExceeded)
+            if (completeCause == DictationCompletionCause.TimeoutExceeded) {
                 dictationRecognizer.Start();
+            }
         };
 
         dictationRecognizer.Start();
@@ -95,12 +97,12 @@ public class GameAdmin : MonoBehaviour {
         canInput = true;
     }
 
+    public void EnableDictationRecognizer() {
+        dictationRecognizer.Start();
+    }
+
     // その他判定はUpdateで行う
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Return)) {
-            dictationRecognizer.Stop();
-        }
-
         // 感情分析をする
         sentiment = AnalyzeEmotional();
         // 感情により行動を分岐させる
@@ -185,7 +187,7 @@ public class GameAdmin : MonoBehaviour {
     private IEnumerator PositiveInProcess(GameObject vfx) {
         vfx.SetActive(true);
         Sequence sequence = DOTween.Sequence()
-            .Append(vfx.transform.DOMoveX(10f, 25f).SetEase(Ease.Linear).SetRelative(true));
+            .Append(vfx.transform.DOMoveX(5.5f, 19f).SetEase(Ease.Linear).SetRelative(true));
         sequence.Play();
         yield return sequence.WaitForCompletion();
 

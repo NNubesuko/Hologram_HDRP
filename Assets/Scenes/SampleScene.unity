@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 1232.7627, g: 1458.0371, b: 1902.7305, a: 1}
+  m_IndirectSpecularColor: {r: 1328.2871, g: 1590.8066, b: 2118.293, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2298,7 +2298,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 398789243}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 30.5, y: 0.00048184395, z: 1.61}
+  m_LocalPosition: {x: 30.5, y: -0.68, z: 2.33}
   m_LocalScale: {x: 1, y: 1, z: 1.0100002}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4083,7 +4083,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7199510223941042593, guid: 96d456d4e6d946d41ac6a8367fa54e00, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 10
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 7199510223941042593, guid: 96d456d4e6d946d41ac6a8367fa54e00, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5743,7 +5743,6 @@ GameObject:
   - component: {fileID: 845824828}
   - component: {fileID: 845824827}
   - component: {fileID: 845824829}
-  - component: {fileID: 845824830}
   m_Layer: 0
   m_Name: GameAdmin
   m_TagString: Untagged
@@ -5775,6 +5774,7 @@ MonoBehaviour:
   - {fileID: 1832328692}
   - {fileID: 1193149791}
   butterfliesObject: {fileID: 1184591294}
+  canInput: 0
 --- !u!4 &845824826
 Transform:
   m_ObjectHideFlags: 0
@@ -5827,7 +5827,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   photos:
-  - {fileID: 1189220460}
+  - {fileID: 608667755}
   - {fileID: 324335517}
   - {fileID: 1628025103}
   - {fileID: 1880783876}
@@ -5836,7 +5836,7 @@ MonoBehaviour:
   - {fileID: 623886882}
   - {fileID: 225068068}
   - {fileID: 2053595907}
-  - {fileID: 608667755}
+  - {fileID: 1189220460}
   - {fileID: 911265655}
   - {fileID: 1467075169}
   - {fileID: 1821720791}
@@ -5845,19 +5845,7 @@ MonoBehaviour:
   - {fileID: 180852369}
   - {fileID: 1205933037}
   - {fileID: 910230478}
-  photoChangeTime: 10
---- !u!114 &845824830
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 845824824}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a4a648c54b5085448a293a2ae8074a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  photoChangeTime: 5
 --- !u!1 &873680945 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3440968200672152747, guid: 5b0c724d78fc76443aecf7b13c0c78cb, type: 3}
@@ -8127,7 +8115,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1184591294}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 26, y: 1.7, z: 2}
+  m_LocalPosition: {x: 28, y: 1.7, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8158,7 +8146,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1334168050566104467, guid: 1f308e6ceb341634f96b26fb6ebd6ee5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 6
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1334168050566104467, guid: 1f308e6ceb341634f96b26fb6ebd6ee5, type: 3}
       propertyPath: m_LocalRotation.w

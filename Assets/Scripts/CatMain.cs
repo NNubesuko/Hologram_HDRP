@@ -35,6 +35,12 @@ public class CatMain : MonoBehaviour {
         }
     }
 
+    private void Reset() {
+        Debug.Log("Reset");
+        gameAdmin.EnableCanInput();
+        gameAdmin.EnableDictationRecognizer();
+    }
+
     private void Update() {
         if (gameAdmin.isInput) {
             gameAdmin.DisableIsInput();
@@ -49,9 +55,7 @@ public class CatMain : MonoBehaviour {
         if (teleported) {
             if (startAnimation) {
                 startAnimation = false;
-                // FadeAnimation(myRenderer);
                 for (int i = 0; i < catsRenderer.Length; i++) {
-                    // AttachTexture(catsRenderer[i]);
                     FadeAnimation(catsRenderer[i]);
                 }
                 StartCoroutine(Move());
@@ -70,7 +74,7 @@ public class CatMain : MonoBehaviour {
             // 位置を初期化
             transform.position = initPoint.position;
 
-            gameAdmin.EnableCanInput();
+            Invoke("Reset", 1f);
         }
     }
 
