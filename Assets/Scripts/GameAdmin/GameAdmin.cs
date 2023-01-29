@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.VFX;
+using UnityEngine.Windows.Speech;
 using DG.Tweening;
 
 public class GameAdmin : MonoBehaviour {
 
-    [SerializeField] private string input = "";
+    // [SerializeField] private string input = "";
     [SerializeField] private int length;
     [SerializeField] private int size;
     [SerializeField] private int font;
@@ -16,12 +16,12 @@ public class GameAdmin : MonoBehaviour {
     [Header("アニメーション位置")]
     [SerializeField] private Transform teleportPoint;
     [SerializeField] private Transform movePoint;
+    [SerializeField] private Renderer[] catsRenderer;
 
     [Header("ポジティブの場合")]
     [SerializeField] private GameObject butterfliesObject;
-    private VisualEffect butterfliesVFX;
 
-    public PhotoAdmin photoAdmin;
+    public PhotoAdmin photoAdmin { get; private set; }
 
     public string inputText { get; private set; }
 
@@ -29,6 +29,7 @@ public class GameAdmin : MonoBehaviour {
     public int textureSize { get; private set; }
     public int fontSize { get; private set; }
 
+    public bool canInput;
     // 入力されたか
     public bool isInput { get; private set; }
     private bool isAccessWebapi;
@@ -42,9 +43,16 @@ public class GameAdmin : MonoBehaviour {
     private bool negativeInProcess = true;
     private bool neutralInProcess = true;
 
+    private DictationRecognizer dictationRecognizer;
+
     // * 削除予定
-    private void InitField() {
-        inputText = input;
+    private void InitField(string text) {
+        isInput = true;
+        isAccessWebapi = true;
+
+        photoAdmin.DisableShouldSwitchPicture();
+
+        inputText = text;
         textLength = length;
         textureSize = size;
         fontSize = font;
@@ -57,46 +65,44 @@ public class GameAdmin : MonoBehaviour {
         cotohaEmotionalAnalysis = GetComponent<CotohaEmotionalAnalysis>();
         catMain = catObject.GetComponent<CatMain>();
 
-        butterfliesVFX = butterfliesObject.GetComponent<VisualEffect>();
-
+        canInput = true;
         isInput = false;
         isAccessWebapi = false;
+    }
 
-        InitField();
+    private void Start() {
+        dictationRecognizer = new DictationRecognizer();
+        dictationRecognizer.InitialSilenceTimeoutSeconds = 10;
+
+        dictationRecognizer.DictationResult += (text, confidence) => {
+            Debug.Log(text);
+            if (canInput) {
+                canInput = false;
+                InitField(text);
+            }
+        };
+
+        dictationRecognizer.DictationComplete += (completeCause) => {
+            // 要因がタイムアウトなら再び起動
+            if (completeCause == DictationCompletionCause.TimeoutExceeded)
+                dictationRecognizer.Start();
+        };
+
+        dictationRecognizer.Start();
+    }
+
+    public void EnableCanInput() {
+        canInput = true;
     }
 
     // その他判定はUpdateで行う
     private void Update() {
-        // todo: マイク入力完了に変更
         if (Input.GetKeyDown(KeyCode.Return)) {
-            isInput = true;
-            isAccessWebapi = true;
-
-            photoAdmin.DisableShouldSwitchPicture();
-
-            InitField();
+            dictationRecognizer.Stop();
         }
 
-        // 感情分析結果を格納するクラスから、感情を取得
-        ResponceEmotionalAnalysis responceEmotionalAnalysis =
-            cotohaEmotionalAnalysis.responceEmotionalAnalysis;
-
-        if (responceEmotionalAnalysis != null) {
-            // WebAPIのレスポンスから感情のリストを取得
-            EmotionalAnalysisResult emotionalAnalysisResult = responceEmotionalAnalysis.result;
-            List<EmotionalAnalysisPhrase> emotionalList = emotionalAnalysisResult.emotional_phrase;
-
-            // 初期値をNeutralの0に設定
-            int sentimentCount = 0;
-            // 各フレーズごとに感情を分ける
-            for (int i = 0; i < emotionalList.Count; i++) {
-                sentimentCount += GetEmotionalNumber(emotionalList[i].emotion);
-            }
-            // 感情値から感情を取得
-            sentiment = GetEmotional(sentimentCount);
-            cotohaEmotionalAnalysis.InitResponceEmotionalAnalysis();
-        }
-
+        // 感情分析をする
+        sentiment = AnalyzeEmotional();
         // 感情により行動を分岐させる
         SelectSentimentType(sentiment);
     }
@@ -117,6 +123,33 @@ public class GameAdmin : MonoBehaviour {
         }
     }
 
+    private string AnalyzeEmotional() {
+        string currentSentiment = sentiment;
+
+        // 感情分析結果を格納するクラスから、感情を取得
+        ResponceEmotionalAnalysis responceEmotionalAnalysis =
+            cotohaEmotionalAnalysis.responceEmotionalAnalysis;
+
+        if (responceEmotionalAnalysis != null) {
+            // WebAPIのレスポンスから感情のリストを取得
+            EmotionalAnalysisResult emotionalAnalysisResult = responceEmotionalAnalysis.result;
+            List<EmotionalAnalysisPhrase> emotionalList = emotionalAnalysisResult.emotional_phrase;
+
+            // 初期値をNeutralの0に設定
+            int sentimentCount = 0;
+            // 各フレーズごとに感情を分ける
+            for (int i = 0; i < emotionalList.Count; i++) {
+                sentimentCount += GetEmotionalNumber(emotionalList[i].emotion);
+            }
+            cotohaEmotionalAnalysis.InitResponceEmotionalAnalysis();
+
+            // 感情値から感情を取得
+            currentSentiment = GetEmotional(sentimentCount);
+        }
+
+        return currentSentiment;
+    }
+
     /// <summary>
     /// 感情により行動を分岐するメソッド
     /// </summary>
@@ -128,7 +161,7 @@ public class GameAdmin : MonoBehaviour {
             case SentimentType.Positive:
                 if (positiveInProcess) {
                     positiveInProcess = false;
-                    StartCoroutine(PositiveInProcess(butterfliesObject.transform, 3));
+                    StartCoroutine(PositiveInProcess(butterfliesObject));
                 }
                 break;
             case SentimentType.Negative:
@@ -149,13 +182,18 @@ public class GameAdmin : MonoBehaviour {
         }
     }
 
-    private IEnumerator PositiveInProcess(Transform vfx, int repeatCount) {
-        vfx.DOMove(new Vector3(10f, 0f, 0f), 25f).SetEase(Ease.Linear).SetRelative(true);
-        vfx.GetComponent<VisualEffect>().enabled = true;
-        for (int i = 0; i < repeatCount; i++) {
-            vfx.GetComponent<VisualEffect>().Play();
-            yield return null;
-        }
+    private IEnumerator PositiveInProcess(GameObject vfx) {
+        vfx.SetActive(true);
+        Sequence sequence = DOTween.Sequence()
+            .Append(vfx.transform.DOMoveX(10f, 25f).SetEase(Ease.Linear).SetRelative(true));
+        sequence.Play();
+        yield return sequence.WaitForCompletion();
+
+        Vector3 butterfliesPosition = butterfliesObject.transform.position;
+        butterfliesPosition.x = teleportPoint.position.x;
+        butterfliesObject.transform.position = butterfliesPosition;
+
+        vfx.SetActive(false);
     }
 
     /// <summary>
@@ -227,17 +265,6 @@ public class GameAdmin : MonoBehaviour {
         positiveInProcess = true;
         negativeInProcess = true;
         neutralInProcess = true;
-    }
-
-    /// <summary>
-    /// 蝶のパラメータを初期化するメソッド
-    /// </summary>
-    public void ResetButterflies() {
-        Vector3 butterfliesPosition = butterfliesObject.transform.position;
-        butterfliesPosition.x = teleportPoint.position.x;
-        butterfliesObject.transform.position = butterfliesPosition;
-
-        butterfliesVFX.enabled = false;
     }
 
 }

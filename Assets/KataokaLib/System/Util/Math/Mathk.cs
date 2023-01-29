@@ -11,6 +11,16 @@ namespace KataokaLib.System {
             return value;
         }
 
+        public static int Normalize(int x, int min, int max) {
+            int cycle = max - min;
+            x = (x - min) % cycle + min;
+
+            if (x < min)
+                x += cycle;
+
+            return x;
+        }
+
     }
 
 }

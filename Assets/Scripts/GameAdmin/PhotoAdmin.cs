@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using KataokaLib.System;
 
 public class PhotoAdmin : MonoBehaviour {
 
@@ -37,7 +38,7 @@ public class PhotoAdmin : MonoBehaviour {
             FadePhotoMaterial(photos[currentPhotoIndex], 0f, 1f);
             photos[currentPhotoIndex].transform.DOMoveZ(10f, 1f);
 
-            currentPhotoIndex = Normalize(currentPhotoIndex + 1, 0, photos.Length);
+            currentPhotoIndex = Mathk.Normalize(currentPhotoIndex + 1, 0, photos.Length);
 
             FadePhotoMaterial(photos[currentPhotoIndex], 1f, 1f);
             photos[currentPhotoIndex].transform.DOMoveZ(6f, 1f);
@@ -47,16 +48,6 @@ public class PhotoAdmin : MonoBehaviour {
     private void FadePhotoMaterial(GameObject photo, float target, float time) {
         photo.GetComponent<Renderer>().material.DOFade(target, time);
         photo.transform.GetChild(0).GetComponent<Renderer>().material.DOFade(target, time);
-    }
-
-    private int Normalize(int x, int min, int max) {
-        int cycle = max - min;
-        x = (x - min) % cycle + min;
-
-        if (x < min)
-            x += cycle;
-
-        return x;
     }
 
     public void EnableShouldSwitchPicture() {

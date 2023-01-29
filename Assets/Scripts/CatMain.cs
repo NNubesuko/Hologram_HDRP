@@ -6,38 +6,36 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using DG.Tweening;
+using KataokaLib.System;
 
 public class CatMain : MonoBehaviour {
 
     [SerializeField] private GameAdmin gameAdmin;
-    [SerializeField] private Renderer catRenderer;      // 猫のRenderer
+    [SerializeField] private Renderer[] catsRenderer;
+    [SerializeField] private Renderer myRenderer;      // 猫のRenderer
     [SerializeField] private Transform initPoint;       // 初期位置
     [SerializeField] private Transform teleportPoint;   // テクスチャ設定後の転送先
     [SerializeField] private Transform movePoint;       // 移動先
 
-    public UnityAction texturedCallback;
+    private Texture2D createdTexutre;
 
-    private Material material;
-    // 入力されたか
-    private bool inputed = false;
     // テクスチャを適応することが出来たか
     private bool attachedTexture = false;
     // 絵画の場所に移動したか
     public bool teleported { get; private set; }
     // アニメーションが始まったか
     private bool startAnimation = false;
+    public bool finishedAnimation { get; private set; }
 
-    private Vector3 lastPosition;
+    private Sequence sequence;
 
     private void Awake() {
-        material = catRenderer.material;
+        for (int i = 0; i < catsRenderer.Length; i++) {
+            catsRenderer[i].enabled = false;
+        }
     }
 
     private void Update() {
-        // if (Input.GetKeyDown(KeyCode.Return)) {
-        //     inputed = true;
-        // }
-
         if (gameAdmin.isInput) {
             gameAdmin.DisableIsInput();
             Attach();
@@ -51,15 +49,28 @@ public class CatMain : MonoBehaviour {
         if (teleported) {
             if (startAnimation) {
                 startAnimation = false;
-
-                FadeAnimation();
+                // FadeAnimation(myRenderer);
+                for (int i = 0; i < catsRenderer.Length; i++) {
+                    // AttachTexture(catsRenderer[i]);
+                    FadeAnimation(catsRenderer[i]);
+                }
                 StartCoroutine(Move());
             }
         }
 
-        if (!(teleported | startAnimation)) {
+        if (finishedAnimation) {
+            finishedAnimation = false;
+
+            // パラメータを初期化
+            InitParams();
+
+            // マテリアルを初期化
+            InitCatMaterial(myRenderer);
+
+            // 位置を初期化
             transform.position = initPoint.position;
-            gameAdmin.ResetButterflies();
+
+            gameAdmin.EnableCanInput();
         }
     }
 
@@ -67,7 +78,7 @@ public class CatMain : MonoBehaviour {
      * 生成したテクスチャをオブジェクトに付けるメソッド
      */
     private void Attach() {
-        Texture2D attachTexture = CreateTexture.Create(
+        createdTexutre = CreateTexture.Create(
             gameAdmin.textureSize,
             gameAdmin.textureSize,
             Brushes.Black,
@@ -77,16 +88,24 @@ public class CatMain : MonoBehaviour {
             FormatText(gameAdmin.inputText, gameAdmin.textLength)
         );
 
-        attachTexture.filterMode = FilterMode.Point;
-        attachTexture.Apply();
+        createdTexutre.filterMode = FilterMode.Point;
+        createdTexutre.Apply();
 
-        // 白い状態から出ないと文字色を変更できないため、白で塗りつぶす
-        material.color = UnityEngine.Color.white;
-        material.SetTexture("_BaseColorMap", attachTexture);
-        
+        AttachTexture(myRenderer);
+        for (int i = 0; i < catsRenderer.Length; i++) {
+            AttachTexture(catsRenderer[i]);
+        }
+
         attachedTexture = true;
-        // コールバック実行
-        texturedCallback?.Invoke();
+    }
+
+    /*
+     * テクスチャをアタッチするメソッド
+     */
+    public void AttachTexture(Renderer renderer) {
+        // 白い状態から出ないと文字色を変更できないため、白で塗りつぶす
+        renderer.material.color = UnityEngine.Color.white;
+        renderer.material.SetTexture("_BaseColorMap", createdTexutre);
     }
 
     /*
@@ -113,29 +132,29 @@ public class CatMain : MonoBehaviour {
     /// </summary>
     /// <returns></returns>
     private IEnumerator Move() {
-        while (transform.position.x <= movePoint.position.x) {
-            transform.DOMove(new Vector3(4f, 0f, 0f), 4f).SetEase(Ease.Linear).SetRelative(true);
+        int catIndex = -1;
+        while (catIndex != 3) {
             yield return new WaitForSeconds(2f);
-            
-            transform.DOPause();
-            yield return new WaitForSeconds(2f);
-            
-            transform.DOPlay();
 
-            yield return null;
+            if (catIndex != -1)
+                catsRenderer[catIndex].enabled = false;
+            catIndex = (catIndex + 1) % catsRenderer.Length;
+            catsRenderer[catIndex].enabled = true;
+            yield return new WaitForSeconds(2f);
         }
 
-        InitParams();
+        catsRenderer[catIndex].enabled = false;
+        finishedAnimation = true;
     }
 
     /// <summary>
     /// 猫をフェードイン・フェードアウトするメソッド
     /// </summary>
-    private void FadeAnimation() {
-        Sequence sequence = DOTween.Sequence();
+    private void FadeAnimation(Renderer renderer) {
+        sequence = DOTween.Sequence();
         sequence.Append(
-            material.DOFade(0f, 1.8f).SetDelay(0.2f)
-        ).SetLoops(10, LoopType.Yoyo);
+            renderer.material.DOFade(0f, 1.8f).SetDelay(0.2f)
+        ).SetLoops(9, LoopType.Yoyo);
         sequence.Play();
     }
 
@@ -143,13 +162,16 @@ public class CatMain : MonoBehaviour {
     /// イベント処理で使用するパラメータの初期化
     /// </summary>
     private void InitParams() {
-        inputed = false;
+        finishedAnimation = false;
         attachedTexture = false;
         teleported = false;
-        material.color = UnityEngine.Color.black;
         // 感情を初期化
         gameAdmin.InitSentiment();
         gameAdmin.photoAdmin.EnableShouldSwitchPicture();
+    }
+
+    private void InitCatMaterial(Renderer renderer) {
+        renderer.material.color = UnityEngine.Color.black;
     }
 
 }
