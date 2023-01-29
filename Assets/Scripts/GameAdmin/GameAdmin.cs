@@ -21,6 +21,10 @@ public class GameAdmin : MonoBehaviour {
     [Header("ポジティブの場合")]
     [SerializeField] private GameObject butterfliesObject;
 
+    [Header("ネガティブの場合")]
+    [SerializeField] private Renderer[] grassRenderers;
+    [SerializeField] private Light[] lights;
+
     public PhotoAdmin photoAdmin { get; private set; }
 
     public string inputText { get; private set; }
@@ -93,14 +97,6 @@ public class GameAdmin : MonoBehaviour {
         dictationRecognizer.Start();
     }
 
-    public void EnableCanInput() {
-        canInput = true;
-    }
-
-    public void EnableDictationRecognizer() {
-        dictationRecognizer.Start();
-    }
-
     // その他判定はUpdateで行う
     private void Update() {
         // 感情分析をする
@@ -109,6 +105,7 @@ public class GameAdmin : MonoBehaviour {
         SelectSentimentType(sentiment);
     }
 
+#region WebAPI処理
     // WebAPIの処理はFixedUpdateで行う
     private void FixedUpdate() {
         // アクセストークンの要求
@@ -151,7 +148,9 @@ public class GameAdmin : MonoBehaviour {
 
         return currentSentiment;
     }
+#endregion
 
+#region 感情分析による処理
     /// <summary>
     /// 感情により行動を分岐するメソッド
     /// </summary>
@@ -169,13 +168,14 @@ public class GameAdmin : MonoBehaviour {
             case SentimentType.Negative:
                 if (negativeInProcess) {
                     negativeInProcess = false;
-                    // コルーチン
+                    StartCoroutine(NegativeInProcess(grassRenderers, lights));
                 }
                 break;
             case SentimentType.Neutral:
                 if (neutralInProcess) {
                     neutralInProcess = false;
-                    // コルーチン
+                    StartCoroutine(PositiveInProcess(butterfliesObject));
+                    StartCoroutine(NegativeInProcess(grassRenderers, lights));
                 }
                 break;
             default:
@@ -184,19 +184,7 @@ public class GameAdmin : MonoBehaviour {
         }
     }
 
-    private IEnumerator PositiveInProcess(GameObject vfx) {
-        vfx.SetActive(true);
-        Sequence sequence = DOTween.Sequence()
-            .Append(vfx.transform.DOMoveX(5.5f, 19f).SetEase(Ease.Linear).SetRelative(true));
-        sequence.Play();
-        yield return sequence.WaitForCompletion();
-
-        Vector3 butterfliesPosition = butterfliesObject.transform.position;
-        butterfliesPosition.x = teleportPoint.position.x;
-        butterfliesObject.transform.position = butterfliesPosition;
-
-        vfx.SetActive(false);
-    }
+    
 
     /// <summary>
     /// 渡されたフレーズが、ポジティブなら1、ネガティブなら-1、中立なら0を返却するメソッド
@@ -254,9 +242,52 @@ public class GameAdmin : MonoBehaviour {
             return SentimentType.Neutral;
         }
     }
+#endregion
 
+    private IEnumerator PositiveInProcess(GameObject vfx) {
+        vfx.SetActive(true);
+        Sequence sequence = DOTween.Sequence()
+            .Append(vfx.transform.DOMoveX(5.5f, 19f).SetEase(Ease.Linear).SetRelative(true));
+        sequence.Play();
+        yield return sequence.WaitForCompletion();
+
+        Vector3 butterfliesPosition = butterfliesObject.transform.position;
+        butterfliesPosition.x = teleportPoint.position.x;
+        butterfliesObject.transform.position = butterfliesPosition;
+
+        vfx.SetActive(false);
+    }
+
+    private IEnumerator NegativeInProcess(Renderer[] renderers, Light[] lights) {
+        for (int i = 0; i < lights.Length; i++) {
+            lights[i].intensity = 0f;
+        }
+
+        Sequence sequence = DOTween.Sequence();
+        for (int i = 0; i < renderers.Length; i++) {
+            sequence.Append(renderers[i].material.DOFade(0f, 5f)).SetLoops(2, LoopType.Yoyo);
+        }
+        sequence.Play();
+        yield return sequence.WaitForCompletion();
+        
+        for (int i = 0; i < lights.Length; i++) {
+            lights[i].intensity = 3000f;
+        }
+
+    }
+
+#region bool処理
     public void DisableIsInput() {
         isInput = false;
+    }
+
+    public void EnableCanInput() {
+        canInput = true;
+    }
+#endregion
+
+    public void EnableDictationRecognizer() {
+        dictationRecognizer.Start();
     }
 
     /// <summary>
