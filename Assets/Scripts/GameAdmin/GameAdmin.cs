@@ -255,7 +255,7 @@ public class GameAdmin : MonoBehaviour {
         yield return sequence.WaitForCompletion();
 
         Vector3 butterfliesPosition = butterfliesObject.transform.position;
-        butterfliesPosition.x = teleportPoint.position.x;
+        butterfliesPosition.x = 28f;
         butterfliesObject.transform.position = butterfliesPosition;
 
         vfx.SetActive(false);
