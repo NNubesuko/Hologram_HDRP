@@ -6,6 +6,7 @@ using DG.Tweening;
 
 public class GameAdmin : MonoBehaviour {
 
+    [SerializeField] private string seInputText = "";
     [SerializeField] private int length;
     [SerializeField] private int size;
     [SerializeField] private int font;
@@ -98,6 +99,9 @@ public class GameAdmin : MonoBehaviour {
 
     // その他判定はUpdateで行う
     private void Update() {
+        // if (Input.GetKeyDown(KeyCode.Return)) {
+        //     InitField(seInputText);
+        // }
         // 感情分析をする
         sentiment = AnalyzeEmotional();
         // 感情により行動を分岐させる

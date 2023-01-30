@@ -42,6 +42,10 @@ public class CatMain : MonoBehaviour {
     }
 
     private void Update() {
+        Vector3 rotate = transform.eulerAngles;
+        rotate.y += 5f * Time.deltaTime;
+        transform.eulerAngles = rotate;
+
         if (gameAdmin.isInput) {
             gameAdmin.DisableIsInput();
             Attach();
